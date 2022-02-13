@@ -3,7 +3,7 @@ const { MongoClient } = require('mongodb');
 const cuid = require('cuid');
 const io = require('socket.io')(process.env.PORT || 4000, {
 	cors: {
-		origin: [process.env.HOST],
+		origin: [process.env.HOST, 'http://localhost:3000'],
 	},
 });
 
