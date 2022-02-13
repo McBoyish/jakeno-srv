@@ -1,38 +1,59 @@
 require('dotenv').config();
+const { MongoClient } = require('mongodb');
+const cuid = require('cuid');
 const io = require('socket.io')(process.env.PORT || 4000, {
 	cors: {
-		origin: ['http://localhost:3000'],
+		origin: [process.env.HOST],
 	},
 });
 
-const connections = [];
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri);
+await client.connect();
+const db = client.db('randomstranger');
+
+// interfaces
+const rooms = [
+	{
+		roomId: 'id',
+		name: 'test',
+	},
+];
+let messages = [
+	{
+		content: 'test',
+		user: 'test',
+		roomId: 'id',
+	},
+];
+
 io.on('connection', socket => {
-	socket.on('join-room', (usr, id) => {
-		const self = {
-			id: id,
-			usr: usr,
-			sId: null,
-			sUsr: null,
-		};
-		for (const other of connections) {
-			if (other.id !== self.id && !other.sId) {
-				// pair the 2 connections
-				other.sId = self.id;
-				other.sUsr = self.usr;
-				self.sId = other.id;
-				self.sUsr = other.usr;
-				break;
-			}
-		}
-		connections.push(self);
-		console.log(connections);
-		console.log(socket.id);
-		if (self.sId && self.sUsr) {
-			// notify self and other
-			socket.to(self.sId).emit('stranger-found', self.usr); // works
-			socket.emit('stranger-found', self.sUsr); // doesnt work...
+	socket.on('get-room-id', async (name, callback) => {
+		const rooms = db.collection('rooms');
+		const room = await rooms.findOne({ name });
+		if (room) {
+			callback(room.roomId);
 			return;
 		}
-		socket.emit('no-stranger-found');
+		const data = {
+			roomId: cuid().toString(),
+			name: name,
+		};
+		await rooms.insertOne(data);
+		callback(data.roomId);
+	});
+	socket.on('join-room', async roomId => {
+		const messages = await db.collection('messages').find({ roomId }).toArray();
+		socket.emit('join', messages);
+	});
+	socket.on('leave-room', roomId => {
+		socket.leave(roomId);
+	});
+	socket.on('message', (roomId, message) => {
+		await db.collection('messages').insertOne({
+			...message,
+			roomId,
+		});
+		socket.to(id).emit('message', message);
 	});
 });
