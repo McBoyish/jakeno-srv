@@ -4,7 +4,7 @@ export interface Room {
 }
 
 export interface Message {
-	username: string;
+	user: string;
 	content: string;
 	roomId: string;
 }
