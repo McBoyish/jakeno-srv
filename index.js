@@ -51,17 +51,3 @@ async function run() {
 }
 
 run();
-
-// const rooms = [
-// 	{
-// 		roomId: 'id',
-// 		name: 'test',
-// 	},
-// ];
-// let messages = [
-// 	{
-// 		content: 'test',
-// 		user: 'test',
-// 		roomId: 'id',
-// 	},
-// ];
