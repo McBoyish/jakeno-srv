@@ -1,7 +1,7 @@
 require('dotenv').config();
 import { Collection, MongoClient, ObjectId } from 'mongodb';
 import { Server, Socket } from 'socket.io';
-import { Room, Message, User, InputMessage, MessageField } from './types';
+import { Room, Message, User, InputMessage, OutputMessage } from './types';
 const io: Server = require('socket.io')(process.env.PORT || 4000, {
 	cors: {
 		origin: [process.env.ORIGIN, 'http://localhost:3000'],
@@ -19,13 +19,13 @@ async function run() {
 		socket.on(
 			'join-room-request',
 			async (
-				userName: string,
+				username: string,
 				roomName: string,
 				callback: (userId: string, roomId: string) => void
 			) => {
 				const userCollection: Collection<User> = db.collection('users');
 				const roomCollection: Collection<Room> = db.collection('rooms');
-				const user = await userCollection.findOne({ name: userName });
+				const user = await userCollection.findOne({ name: username });
 				const room = await roomCollection.findOne({ name: roomName });
 				let userId = '';
 				let roomId = '';
@@ -33,7 +33,7 @@ async function run() {
 				else {
 					const res = await userCollection.insertOne({
 						_id: new ObjectId().toString(),
-						name: userName,
+						name: username,
 					});
 					userId = res.insertedId;
 				}
@@ -49,54 +49,50 @@ async function run() {
 			}
 		);
 		socket.on('join-room', async (userId: string, roomId: string) => {
-			const userCollection: Collection<User> = db.collection('users');
-			const roomCollection: Collection<Room> = db.collection('rooms');
-			const user = await userCollection.findOne({ _id: userId });
-			const room = await roomCollection.findOne({ _id: roomId });
+			const users: Collection<User> = db.collection('users');
+			const rooms: Collection<Room> = db.collection('rooms');
+			const user = await users.findOne({ _id: userId });
+			const room = await rooms.findOne({ _id: roomId });
 			if (!user || !room || !userId || !roomId) {
-				// user entered room using query parameters (not allowed)
 				socket.emit('join-room-error');
 				return;
 			}
 			socket.join(roomId);
-			const messageCollection: Collection<Message> = db.collection('messages');
-			// can be refactored in the future
-			const messages = await messageCollection.find({ roomId }).toArray();
-			const users = await userCollection.find({}).toArray();
-			const res: MessageField[] = messages.map(message => {
-				const user = users.find(user => user._id === message.userId);
-				return {
-					date: message.date,
-					content: message.content,
-					userName: user.name,
-				};
-			});
+			const messages: Collection<Message> = db.collection('messages');
+			const res = (await messages
+				.aggregate([
+					{ $match: { roomId: roomId } },
+					{ $project: { _id: 0, 'user._id': 0, roomId: 0 } },
+				])
+				.toArray()) as OutputMessage[];
+			console.log(res);
 			socket.emit('join-room-success', res);
 		});
 		socket.on('leave-room', (roomId: string) => {
 			socket.leave(roomId);
+			// broadcast event to room
 		});
 		socket.on(
 			'message',
-			async (message: InputMessage, callback: (res: MessageField) => void) => {
-				const messageCollection: Collection<Message> =
-					db.collection('messages');
-				const userCollection: Collection<User> = db.collection('users');
-				const data = {
+			async (message: InputMessage, callback: (res: OutputMessage) => void) => {
+				const messages: Collection<Message> = db.collection('messages');
+				const users: Collection<User> = db.collection('users');
+				const user = await users.findOne({ _id: message.userId });
+				const data: Message = {
 					_id: new ObjectId().toString(),
-					date: new Date().toISOString(),
-					userId: message.userId,
 					roomId: message.roomId,
 					content: message.content,
+					user: user,
+					date: new Date().toISOString(),
 				};
-				await messageCollection.insertOne(data);
-				const user = await userCollection.findOne({ _id: data.userId });
-				const res: MessageField = {
-					date: data.date,
+				await messages.insertOne(data);
+				const res: OutputMessage = {
 					content: data.content,
-					userName: user.name,
+					user: {
+						name: data.user.name,
+					},
+					date: data.date,
 				};
-				console.log(res);
 				socket.to(message.roomId).emit('message', res);
 				callback(res);
 			}
