@@ -18,12 +18,6 @@ export interface Message {
 	date: string;
 }
 
-export interface OutputMessage {
-	content: string;
-	user: WithoutId<User>;
-	date: string;
-}
-
 export interface InputMessage {
 	roomId: string;
 	content: string;
