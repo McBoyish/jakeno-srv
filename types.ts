@@ -1,5 +1,4 @@
-import { WithoutId } from 'mongodb';
-
+/***************MONGODB INTERFACES***************/
 export interface Room {
 	_id: string;
 	name: string;
@@ -18,8 +17,18 @@ export interface Message {
 	date: string;
 }
 
+/***************API INTERFACES***************/
 export interface InputMessage {
 	roomId: string;
 	content: string;
 	userId: string;
+}
+
+export interface RoomData extends Room {
+	messages: Message[];
+}
+
+export enum ErrorType {
+	UNKNOWN_ERROR = 'unknown-error',
+	ERROR_404 = 'page-not-found',
 }
