@@ -10,6 +10,7 @@ export const messageHandler = (io: Server, socket: Socket, db: Db) => {
 		const messages: Collection<Message> = db.collection('messages');
 		const users: Collection<User> = db.collection('users');
 		const user = await users.findOne({ _id: message.userId });
+		if (!user) return;
 		const data: Message = {
 			_id: new ObjectId().toString(),
 			roomId: message.roomId,
