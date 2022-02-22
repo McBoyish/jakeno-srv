@@ -1,7 +1,7 @@
 import { Db } from 'mongodb';
 import { Server, Socket } from 'socket.io';
 
-export const roomHandler = (_: Server, socket: Socket, __: Db) => {
+export const registerRoomHandlers = (_: Server, socket: Socket, __: Db) => {
 	const joinRoom = async (roomId: string) => {
 		if (!roomId) return;
 		socket.join(roomId);

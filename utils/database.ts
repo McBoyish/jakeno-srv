@@ -1,4 +1,4 @@
-import { MONGODB_URI } from './utils/config';
+import { MONGODB_URI } from './config';
 import { MongoClient, Db } from 'mongodb';
 
 const client = new MongoClient(MONGODB_URI);
