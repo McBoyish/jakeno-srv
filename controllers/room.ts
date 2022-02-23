@@ -25,24 +25,28 @@ roomRouter.get('/:name', async (req, res, next) => {
 	}
 });
 
-roomRouter.post('/', verifyToken, async (req: UserAuthInfoRequest, res, next) => {
-	try {
-		const roomCollection: Collection<Room> = db.collection('rooms');
-		const room = await roomCollection.findOne({ name: req.body.name });
-		if (room) {
-			res.json(null);
-			return;
+roomRouter.post(
+	'/',
+	verifyToken,
+	async (req: UserAuthInfoRequest, res, next) => {
+		try {
+			const roomCollection: Collection<Room> = db.collection('rooms');
+			const room = await roomCollection.findOne({ name: req.body.name });
+			if (room) {
+				res.json(null);
+				return;
+			}
+			const data: Room = {
+				_id: new ObjectId().toString(),
+				name: req.body.name,
+			};
+			await roomCollection.insertOne(data);
+			const roomData: RoomData = { ...data, messages: [] };
+			res.json(roomData);
+		} catch (e) {
+			next(new Error('unknown-error'));
 		}
-		const data: Room = {
-			_id: new ObjectId().toString(),
-			name: req.body.name,
-		};
-		await roomCollection.insertOne(data);
-		const roomData: RoomData = { ...data, messages: [] };
-		res.json(roomData);
-	} catch (e) {
-		next(new Error('unknown-error'));
 	}
-});
+);
 
 export { roomRouter };

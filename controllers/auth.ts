@@ -11,7 +11,8 @@ const authRouter = express.Router();
 authRouter.post('/register', async (req, res, next) => {
 	try {
 		const { name, password } = req.body as InputUserAccount;
-		const accountCollection: Collection<UserAccount> = db.collection('accounts');
+		const accountCollection: Collection<UserAccount> =
+			db.collection('accounts');
 		const userCollection: Collection<User> = db.collection('users');
 		const user = await userCollection.findOne({ name });
 		if (user) {
@@ -37,7 +38,8 @@ authRouter.post('/register', async (req, res, next) => {
 authRouter.post('/login', async (req, res, next) => {
 	try {
 		const { name, password } = req.body as InputUserAccount;
-		const accountCollection: Collection<UserAccount> = db.collection('accounts');
+		const accountCollection: Collection<UserAccount> =
+			db.collection('accounts');
 		const account = await accountCollection.findOne({ 'user.name': name });
 		if (account && (await bcrypt.compare(password, account.password))) {
 			const token = jwt.sign(account.user, AUTH_KEY, {

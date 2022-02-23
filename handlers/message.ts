@@ -3,7 +3,10 @@ import { Server, Socket } from 'socket.io';
 import { InputMessage, Message, User } from '../types';
 
 export const registerMessageHandlers = (io: Server, socket: Socket, db: Db) => {
-	const message = async (message: InputMessage, callback: (res: Message) => void) => {
+	const message = async (
+		message: InputMessage,
+		callback: (res: Message) => void
+	) => {
 		const messages: Collection<Message> = db.collection('messages');
 		const users: Collection<User> = db.collection('users');
 		const user = await users.findOne({ _id: message.userId });
