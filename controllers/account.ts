@@ -1,18 +1,17 @@
 import express from 'express';
 import { Collection, ObjectId } from 'mongodb';
 import { db } from '../utils/database';
-import { User, InputUserAccount, UserAccount, UserData } from '../types';
+import { User, InputAccount, Account, UserData } from '../types';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { AUTH_KEY } from '../utils/config';
 
-const authRouter = express.Router();
+const accountRouter = express.Router();
 
-authRouter.post('/register', async (req, res, next) => {
+accountRouter.post('/register', async (req, res, next) => {
 	try {
-		const { name, password } = req.body as InputUserAccount;
-		const accountCollection: Collection<UserAccount> =
-			db.collection('accounts');
+		const { name, password } = req.body as InputAccount;
+		const accountCollection: Collection<Account> = db.collection('accounts');
 		const userCollection: Collection<User> = db.collection('users');
 		const user = await userCollection.findOne({ name });
 		if (user) {
@@ -20,14 +19,14 @@ authRouter.post('/register', async (req, res, next) => {
 			return;
 		}
 		const encrypted = await bcrypt.hash(password, 10);
-		const account: UserAccount = {
+		const account: Account = {
 			_id: new ObjectId().toString(),
 			user: { _id: new ObjectId().toString(), name },
 			password: encrypted,
 		};
 		await accountCollection.insertOne(account);
 		await userCollection.insertOne(account.user);
-		const token = jwt.sign(account.user, AUTH_KEY, { expiresIn: '7d' });
+		const token = jwt.sign(account.user, AUTH_KEY, { expiresIn: '28d' });
 		const userData: UserData = { ...account.user, token };
 		res.json(userData);
 	} catch (e) {
@@ -35,15 +34,14 @@ authRouter.post('/register', async (req, res, next) => {
 	}
 });
 
-authRouter.post('/login', async (req, res, next) => {
+accountRouter.post('/login', async (req, res, next) => {
 	try {
-		const { name, password } = req.body as InputUserAccount;
-		const accountCollection: Collection<UserAccount> =
-			db.collection('accounts');
+		const { name, password } = req.body as InputAccount;
+		const accountCollection: Collection<Account> = db.collection('accounts');
 		const account = await accountCollection.findOne({ 'user.name': name });
 		if (account && (await bcrypt.compare(password, account.password))) {
 			const token = jwt.sign(account.user, AUTH_KEY, {
-				expiresIn: '7d',
+				expiresIn: '28d',
 			});
 			const userData: UserData = { ...account.user, token };
 			res.json(userData);
@@ -54,4 +52,4 @@ authRouter.post('/login', async (req, res, next) => {
 	}
 });
 
-export { authRouter };
+export { accountRouter };

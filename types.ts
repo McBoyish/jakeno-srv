@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
 /***************MONGODB INTERFACES***************/
-export interface UserAccount {
+export interface Account {
 	_id: string;
 	user: User;
 	password: string;
@@ -41,7 +41,7 @@ export interface InputRoom {
 	name: string;
 }
 
-export interface InputUserAccount {
+export interface InputAccount {
 	name: string;
 	password: string;
 }

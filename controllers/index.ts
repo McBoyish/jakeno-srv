@@ -1,5 +1,5 @@
 import { roomRouter } from './room';
 import { userRouter } from './user';
-import { authRouter } from './auth';
+import { accountRouter } from './account';
 
-export { roomRouter, userRouter, authRouter };
+export { roomRouter, userRouter, accountRouter };
