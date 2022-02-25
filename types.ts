@@ -1,15 +1,23 @@
 import { Request } from 'express';
 
+type DateTime = string;
+
 /***************MONGODB INTERFACES***************/
 export interface Account {
 	_id: string;
 	user: User;
 	password: string;
+	createdAt: DateTime;
 }
 
 export interface Room {
 	_id: string;
+	userId: string;
 	name: string;
+	description: string;
+	locked: boolean;
+	code: string;
+	createdAt: DateTime;
 }
 
 export interface User {
@@ -22,7 +30,7 @@ export interface Message {
 	roomId: string;
 	content: string;
 	user: User;
-	date: string;
+	createdAt: DateTime;
 }
 
 /***************REQUEST INTERFACES***************/
@@ -38,7 +46,11 @@ export interface InputMessage {
 }
 
 export interface InputRoom {
+	userId: string;
 	name: string;
+	description: string;
+	locked: boolean;
+	code: string;
 }
 
 export interface InputAccount {
@@ -46,7 +58,7 @@ export interface InputAccount {
 	password: string;
 }
 
-export interface RoomData extends Room {
+export interface RoomData extends Omit<Room, 'code'> {
 	messages: Message[];
 }
 

@@ -23,6 +23,7 @@ accountRouter.post('/register', async (req, res, next) => {
 			_id: new ObjectId().toString(),
 			user: { _id: new ObjectId().toString(), name },
 			password: encrypted,
+			createdAt: new Date().toISOString(),
 		};
 		await accountCollection.insertOne(account);
 		await userCollection.insertOne(account.user);
@@ -45,6 +46,7 @@ accountRouter.post('/login', async (req, res, next) => {
 			});
 			const userData: UserData = { ...account.user, token };
 			res.json(userData);
+			return;
 		}
 		res.json(null);
 	} catch (e) {

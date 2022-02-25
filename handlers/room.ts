@@ -13,6 +13,7 @@ export const registerRoomHandlers = (_: Server, socket: Socket, __: Db) => {
 		socket.leave(roomId);
 		// broadcast event to room
 	};
+
 	socket.on('join-room', joinRoom);
 	socket.on('leave-room', leaveRoom);
 };

@@ -13,7 +13,7 @@ const unknownEndpoint = (_: Req, res: Res) => {
 
 const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 	if (error.message === 'unknown-error') {
-		res.status(500).json({ message: 'An unknown error has occurred' });
+		res.status(500).json(null);
 		return;
 	}
 	next(error);
@@ -22,14 +22,14 @@ const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 const verifyToken = (req: UserAuthInfoRequest, res: Res, next: Next) => {
 	const token = req.headers['x-access-token'] as string;
 	if (!token) {
-		res.status(403).json({ message: 'A token is required for authentication' });
+		res.status(403).json(null);
 		return;
 	}
 	try {
 		const decoded = jwt.verify(token, AUTH_KEY) as User;
 		req.user = decoded;
 	} catch (e) {
-		res.status(401).json({ message: 'Invalid token' });
+		res.status(401).json(null);
 		return;
 	}
 	next();

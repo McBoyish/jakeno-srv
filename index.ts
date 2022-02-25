@@ -14,7 +14,6 @@ const io = new Server(httpServer, {
 });
 
 io.on('connection', (socket: Socket) => {
-	console.log('connected');
 	registerRoomHandlers(io, socket, db);
 	registerMessageHandlers(io, socket, db);
 });
