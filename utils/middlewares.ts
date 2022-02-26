@@ -20,14 +20,14 @@ const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 };
 
 const verifyToken = (req: UserAuthInfoRequest, res: Res, next: Next) => {
-	const token = req.headers['x-access-token'] as string;
-	if (!token) {
-		res.status(403).json(null);
-		return;
-	}
 	try {
+		const token = req.headers['x-access-token'] as string;
+		if (!token) {
+			res.status(403).json(null);
+			return;
+		}
 		const decoded = jwt.verify(token, AUTH_KEY) as User;
-		req.user = decoded;
+		req.user = { name: decoded.name, _id: decoded._id };
 	} catch (e) {
 		res.status(401).json(null);
 		return;
