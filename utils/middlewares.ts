@@ -16,6 +16,10 @@ const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 		res.status(500).json(null);
 		return;
 	}
+	if (error.message === 'invalid-room-code') {
+		res.status(403).json({ message: error.message });
+		return;
+	}
 	next(error);
 };
 
