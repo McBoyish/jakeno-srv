@@ -5,7 +5,7 @@ const client = new MongoClient(MONGODB_URI);
 let db: Db | null = null;
 
 client.connect().then(client => {
-	db = client.db('randomstranger');
+	db = client.db('jakeno');
 	console.log(`Successfully connected to database`);
 });
 
