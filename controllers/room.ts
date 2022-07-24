@@ -28,7 +28,7 @@ roomRouter.get('/exists/:name', async (req, res, next) => {
 	}
 });
 
-roomRouter.get('/is-locked/:name', async (req, res, next) => {
+roomRouter.get('/is-private/:name', async (req, res, next) => {
 	try {
 		const roomCollection: Collection<Room> = db.collection('rooms');
 		const room = await roomCollection.findOne({ name: req.params.name });
@@ -38,7 +38,7 @@ roomRouter.get('/is-locked/:name', async (req, res, next) => {
 			return;
 		}
 
-		res.json({ locked: room.locked });
+		res.json({ private: !!room.code });
 	} catch (e) {
 		next(new Error('unknown-error'));
 	}
@@ -72,7 +72,7 @@ roomRouter.post('/:name', async (req, res, next) => {
 			return;
 		}
 
-		if (room.locked && req.body.code !== room.code) {
+		if (req.body.code !== room.code) {
 			next(new Error('invalid-room-code'));
 			return;
 		}
@@ -94,7 +94,7 @@ roomRouter.post(
 	verifyToken,
 	async (req: UserAuthInfoRequest, res, next) => {
 		try {
-			const { name, description, locked, code, userId } = req.body as InputRoom;
+			const { name, description, code, userId } = req.body as InputRoom;
 			const roomCollection: Collection<Room> = db.collection('rooms');
 			const room = await roomCollection.findOne({ name });
 
@@ -108,7 +108,6 @@ roomRouter.post(
 				userId,
 				name,
 				description,
-				locked,
 				code,
 				createdAt: new Date().toISOString(),
 			};
@@ -119,7 +118,6 @@ roomRouter.post(
 				userId,
 				name,
 				description,
-				locked,
 				messages: [],
 				createdAt: data.createdAt,
 			};
