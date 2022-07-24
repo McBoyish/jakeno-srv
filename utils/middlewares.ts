@@ -13,7 +13,7 @@ const unknownEndpoint = (_: Req, res: Res) => {
 
 const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 	if (error.message === 'unknown-error') {
-		res.status(500).json(null);
+		res.status(500).json({ message: error.message });
 		return;
 	}
 	if (error.message === 'invalid-room-code') {

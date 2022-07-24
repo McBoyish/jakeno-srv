@@ -12,18 +12,17 @@ import { verifyToken } from '../utils/middlewares';
 
 const roomRouter = express.Router();
 
-roomRouter.post('/verify-code/:name', async (req, res, next) => {
+roomRouter.get('/exists/:name', async (req, res, next) => {
 	try {
 		const roomCollection: Collection<Room> = db.collection('rooms');
 		const room = await roomCollection.findOne({ name: req.params.name });
-		const code = req.body.code;
 
 		if (!room) {
-			res.json(null);
+			res.json({ exists: false });
 			return;
 		}
 
-		res.json({ valid: code === room.code });
+		res.json({ exists: true });
 	} catch (e) {
 		next(new Error('unknown-error'));
 	}
@@ -40,6 +39,23 @@ roomRouter.get('/is-locked/:name', async (req, res, next) => {
 		}
 
 		res.json({ locked: room.locked });
+	} catch (e) {
+		next(new Error('unknown-error'));
+	}
+});
+
+roomRouter.post('/verify-code/:name', async (req, res, next) => {
+	try {
+		const roomCollection: Collection<Room> = db.collection('rooms');
+		const room = await roomCollection.findOne({ name: req.params.name });
+		const code = req.body.code;
+
+		if (!room) {
+			res.json(null);
+			return;
+		}
+
+		res.json({ valid: code === room.code });
 	} catch (e) {
 		next(new Error('unknown-error'));
 	}
