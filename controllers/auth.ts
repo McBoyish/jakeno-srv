@@ -2,7 +2,7 @@ import express from 'express';
 import { verifyToken } from '../utils/middlewares';
 import { UserAuthInfoRequest } from '../types';
 
-const authRouter = express.Router();
+export const authRouter = express.Router();
 
 authRouter.post(
 	'/verify',
@@ -15,5 +15,3 @@ authRouter.post(
 		}
 	}
 );
-
-export { authRouter };

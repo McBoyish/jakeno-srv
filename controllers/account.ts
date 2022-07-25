@@ -6,14 +6,14 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { AUTH_KEY } from '../utils/config';
 
-const accountRouter = express.Router();
+export const accountRouter = express.Router();
 
 accountRouter.post('/register', async (req, res, next) => {
 	try {
 		const { name, password } = req.body as InputAccount;
 
-		const accountCollection: Collection<Account> = db.collection('accounts');
-		const userCollection: Collection<User> = db.collection('users');
+		const accountCollection = db.collection<Account>('accounts');
+		const userCollection = db.collection<User>('users');
 		const user = await userCollection.findOne({ name });
 
 		if (user) {
@@ -46,7 +46,7 @@ accountRouter.post('/login', async (req, res, next) => {
 	try {
 		const { name, password } = req.body as InputAccount;
 
-		const accountCollection: Collection<Account> = db.collection('accounts');
+		const accountCollection = db.collection<Account>('accounts');
 		const account = await accountCollection.findOne({ 'user.name': name });
 
 		if (account && (await bcrypt.compare(password, account.password))) {
@@ -63,5 +63,3 @@ accountRouter.post('/login', async (req, res, next) => {
 		next(new Error('unknown-error'));
 	}
 });
-
-export { accountRouter };

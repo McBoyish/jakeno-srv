@@ -10,11 +10,11 @@ import {
 } from '../types';
 import { verifyToken } from '../utils/middlewares';
 
-const roomRouter = express.Router();
+export const roomRouter = express.Router();
 
 roomRouter.get('/exists/:name', async (req, res, next) => {
 	try {
-		const roomCollection: Collection<Room> = db.collection('rooms');
+		const roomCollection = db.collection<Room>('rooms');
 		const room = await roomCollection.findOne({ name: req.params.name });
 
 		if (!room) {
@@ -30,7 +30,7 @@ roomRouter.get('/exists/:name', async (req, res, next) => {
 
 roomRouter.get('/is-private/:name', async (req, res, next) => {
 	try {
-		const roomCollection: Collection<Room> = db.collection('rooms');
+		const roomCollection = db.collection<Room>('rooms');
 		const room = await roomCollection.findOne({ name: req.params.name });
 
 		if (!room) {
@@ -46,9 +46,10 @@ roomRouter.get('/is-private/:name', async (req, res, next) => {
 
 roomRouter.post('/verify-code/:name', async (req, res, next) => {
 	try {
-		const roomCollection: Collection<Room> = db.collection('rooms');
+		const { code } = req.body as { code: string };
+
+		const roomCollection = db.collection<Room>('rooms');
 		const room = await roomCollection.findOne({ name: req.params.name });
-		const code = req.body.code;
 
 		if (!room) {
 			res.json(null);
@@ -63,7 +64,9 @@ roomRouter.post('/verify-code/:name', async (req, res, next) => {
 
 roomRouter.post('/:name', async (req, res, next) => {
 	try {
-		const roomCollection: Collection<Room> = db.collection('rooms');
+		const { code } = req.body as { code: string };
+
+		const roomCollection = db.collection<Room>('rooms');
 		const room = await roomCollection.findOne({ name: req.params.name });
 		const roomNoCode = { ...room, code: undefined } as Omit<Room, 'code'>;
 
@@ -72,12 +75,12 @@ roomRouter.post('/:name', async (req, res, next) => {
 			return;
 		}
 
-		if (req.body.code !== room.code) {
+		if (code !== room.code) {
 			next(new Error('invalid-room-code'));
 			return;
 		}
 
-		const messageCollection: Collection<Message> = db.collection('messages');
+		const messageCollection = db.collection<Message>('messages');
 		const messages = (await messageCollection
 			.aggregate([{ $match: { roomId: room._id } }])
 			.toArray()) as Message[];
@@ -95,7 +98,8 @@ roomRouter.post(
 	async (req: UserAuthInfoRequest, res, next) => {
 		try {
 			const { name, description, code, userId } = req.body as InputRoom;
-			const roomCollection: Collection<Room> = db.collection('rooms');
+
+			const roomCollection = db.collection<Room>('rooms');
 			const room = await roomCollection.findOne({ name });
 
 			if (room) {
@@ -127,5 +131,3 @@ roomRouter.post(
 		}
 	}
 );
-
-export { roomRouter };
