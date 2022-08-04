@@ -10,7 +10,9 @@ roomRouter.get('/', async (_, res, next) => {
 	try {
 		const roomCollection = db.collection<Room>('rooms');
 		// find all public rooms
-		const rooms = await roomCollection.find({ code: '' }).toArray();
+		const rooms = await roomCollection
+			.find({ code: '' }, { projection: { code: 0 } })
+			.toArray();
 		res.json(rooms);
 	} catch (e) {
 		next(new Error('unknown-error'));
@@ -87,7 +89,7 @@ roomRouter.post('/:name', async (req, res, next) => {
 
 		const messageCollection = db.collection<Message>('messages');
 		const messages = (await messageCollection
-			.aggregate([{ $match: { roomId: room._id } }])
+			.find({ roomId: room._id })
 			.toArray()) as Message[];
 
 		const roomData = { ...roomNoCode, messages };
