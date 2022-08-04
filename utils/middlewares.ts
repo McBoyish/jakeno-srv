@@ -1,6 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { UserAuthInfoRequest, User } from '../types';
+import { AuthRequest, User } from '../types';
 import { AUTH_KEY } from './config';
 
 type Req = express.Request;
@@ -23,7 +23,7 @@ const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 	next(error);
 };
 
-const verifyToken = (req: UserAuthInfoRequest, res: Res, next: Next) => {
+const verifyToken = (req: AuthRequest, res: Res, next: Next) => {
 	try {
 		const token = req.headers['x-access-token'] as string;
 		if (!token) {

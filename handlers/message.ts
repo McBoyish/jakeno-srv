@@ -1,4 +1,4 @@
-import { Collection, Db, DbOptions, ObjectId } from 'mongodb';
+import { Db, ObjectId } from 'mongodb';
 import { Server, Socket } from 'socket.io';
 import { InputMessage, Message, Room, User } from '../types';
 

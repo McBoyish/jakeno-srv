@@ -1,16 +1,21 @@
 import express from 'express';
-import { Collection, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { db } from '../utils/database';
-import {
-	InputRoom,
-	Message,
-	Room,
-	RoomData,
-	UserAuthInfoRequest,
-} from '../types';
+import { InputRoom, Message, Room, RoomData, AuthRequest } from '../types';
 import { verifyToken } from '../utils/middlewares';
 
 export const roomRouter = express.Router();
+
+roomRouter.get('/', async (_, res, next) => {
+	try {
+		const roomCollection = db.collection<Room>('rooms');
+		// find all public rooms
+		const rooms = await roomCollection.find({ code: '' }).toArray();
+		res.json(rooms);
+	} catch (e) {
+		next(new Error('unknown-error'));
+	}
+});
 
 roomRouter.get('/exists/:name', async (req, res, next) => {
 	try {
@@ -92,42 +97,38 @@ roomRouter.post('/:name', async (req, res, next) => {
 	}
 });
 
-roomRouter.post(
-	'/',
-	verifyToken,
-	async (req: UserAuthInfoRequest, res, next) => {
-		try {
-			const { name, description, code, userId } = req.body as InputRoom;
+roomRouter.post('/', verifyToken, async (req: AuthRequest, res, next) => {
+	try {
+		const { name, description, code, userId } = req.body as InputRoom;
 
-			const roomCollection = db.collection<Room>('rooms');
-			const room = await roomCollection.findOne({ name });
+		const roomCollection = db.collection<Room>('rooms');
+		const room = await roomCollection.findOne({ name });
 
-			if (room) {
-				res.json(null);
-				return;
-			}
-
-			const data: Room = {
-				_id: new ObjectId().toString(),
-				userId,
-				name,
-				description,
-				code,
-				createdAt: new Date().toISOString(),
-			};
-			await roomCollection.insertOne(data);
-
-			const roomData: RoomData = {
-				_id: data._id,
-				userId,
-				name,
-				description,
-				messages: [],
-				createdAt: data.createdAt,
-			};
-			res.json(roomData);
-		} catch (e) {
-			next(new Error('unknown-error'));
+		if (room) {
+			res.json(null);
+			return;
 		}
+
+		const data: Room = {
+			_id: new ObjectId().toString(),
+			userId,
+			name,
+			description,
+			code,
+			createdAt: new Date().toISOString(),
+		};
+		await roomCollection.insertOne(data);
+
+		const roomData: RoomData = {
+			_id: data._id,
+			userId,
+			name,
+			description,
+			messages: [],
+			createdAt: data.createdAt,
+		};
+		res.json(roomData);
+	} catch (e) {
+		next(new Error('unknown-error'));
 	}
-);
+});

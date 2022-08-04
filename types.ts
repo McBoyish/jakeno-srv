@@ -33,7 +33,7 @@ export interface Message {
 }
 
 /***************REQUEST INTERFACES***************/
-export interface UserAuthInfoRequest extends Request {
+export interface AuthRequest extends Request {
 	user: User;
 }
 

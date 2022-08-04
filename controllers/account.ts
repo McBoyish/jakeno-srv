@@ -1,5 +1,5 @@
 import express from 'express';
-import { Collection, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { db } from '../utils/database';
 import { User, InputAccount, Account, UserData } from '../types';
 import bcrypt from 'bcryptjs';
