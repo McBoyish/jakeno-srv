@@ -5,22 +5,19 @@ type DateTime = string;
 /***************MONGODB INTERFACES***************/
 export interface Account {
 	_id: string;
-	user: User;
 	password: string;
+	user: User;
 	createdAt: DateTime;
 }
 
 export interface Room {
 	_id: string;
-	userId: string;
 	name: string;
 	description: string;
 	code: string;
+	isPrivate: boolean;
+	user: User;
 	createdAt: DateTime;
-}
-
-export interface LiveRoom extends Omit<Room, 'code'> {
-	activeUsers: number;
 }
 
 export interface User {
@@ -44,12 +41,12 @@ export interface AuthRequest extends Request {
 /***************API INTERFACES***************/
 export interface InputMessage {
 	roomId: string;
+	roomName: string;
+	user: User;
 	content: string;
-	userId: string;
 }
 
 export interface InputRoom {
-	userId: string;
 	name: string;
 	description: string;
 	code: string;
@@ -60,8 +57,14 @@ export interface InputAccount {
 	password: string;
 }
 
-export interface RoomData extends Omit<Room, 'code'> {
+export type RoomNoCode = Omit<Room, 'code'>;
+
+export interface RoomData extends RoomNoCode {
 	messages: Message[];
+}
+
+export interface LiveRoom extends RoomNoCode {
+	activeUsers: number;
 }
 
 export interface UserData extends User {

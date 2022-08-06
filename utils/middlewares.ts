@@ -7,11 +7,11 @@ type Req = express.Request;
 type Res = express.Response;
 type Next = express.NextFunction;
 
-const unknownEndpoint = (_: Req, res: Res) => {
+export const unknownEndpoint = (_: Req, res: Res) => {
 	res.status(404).json({ message: 'page-not-found' });
 };
 
-const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
+export const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 	if (error.message === 'unknown-error') {
 		res.status(500).json({ message: error.message });
 		return;
@@ -23,7 +23,7 @@ const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 	next(error);
 };
 
-const verifyToken = (req: AuthRequest, res: Res, next: Next) => {
+export const verifyToken = (req: AuthRequest, res: Res, next: Next) => {
 	try {
 		const token = req.headers['x-access-token'] as string;
 		if (!token) {
@@ -32,11 +32,9 @@ const verifyToken = (req: AuthRequest, res: Res, next: Next) => {
 		}
 		const decoded = jwt.verify(token, AUTH_KEY) as User;
 		req.user = { name: decoded.name, _id: decoded._id };
+		next();
 	} catch (e) {
 		res.status(401).json(null);
 		return;
 	}
-	next();
 };
-
-export { unknownEndpoint, errorHandler, verifyToken };

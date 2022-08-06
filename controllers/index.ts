@@ -1,5 +1,3 @@
-import { roomRouter } from './room';
-import { accountRouter } from './account';
-import { authRouter } from './auth';
-
-export { roomRouter, accountRouter, authRouter };
+export { roomRouter } from './room';
+export { accountRouter } from './account';
+export { authRouter } from './auth';
