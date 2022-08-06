@@ -1,24 +1,18 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
-import { db } from '../utils/database';
-import {
-	InputRoom,
-	Message,
-	Room,
-	RoomData,
-	AuthRequest,
-	RoomNoCode,
-} from '../types';
+import { insertOne, find, findOne } from '../utils/database';
+import { InputRoom, Room, AuthRequest, RoomNoCode } from '../types';
 import { verifyToken } from '../utils/middlewares';
 
 export const roomRouter = express.Router();
 
 roomRouter.get('/', async (_, res, next) => {
 	try {
-		const roomCollection = db.collection<Room>('rooms');
-		const rooms = (await roomCollection
-			.find({ code: '' }, { projection: { code: 0 } })
-			.toArray()) as RoomNoCode[];
+		const rooms = (await find<Room>(
+			'rooms',
+			{ code: '' },
+			{ projection: { code: 0 } }
+		)) as RoomNoCode[];
 		res.json(rooms);
 	} catch (e) {
 		next(new Error('unknown-error'));
@@ -27,8 +21,7 @@ roomRouter.get('/', async (_, res, next) => {
 
 roomRouter.get('/exists/:name', async (req, res, next) => {
 	try {
-		const roomCollection = db.collection<Room>('rooms');
-		const room = await roomCollection.findOne({ name: req.params.name });
+		const room = await findOne<Room>('rooms', { name: req.params.name });
 		if (!room) {
 			res.json({ exists: false });
 			return;
@@ -41,8 +34,7 @@ roomRouter.get('/exists/:name', async (req, res, next) => {
 
 roomRouter.get('/is-private/:name', async (req, res, next) => {
 	try {
-		const roomCollection = db.collection<Room>('rooms');
-		const room = await roomCollection.findOne({ name: req.params.name });
+		const room = await findOne<Room>('rooms', { name: req.params.name });
 		if (!room) {
 			res.json(null);
 			return;
@@ -56,8 +48,7 @@ roomRouter.get('/is-private/:name', async (req, res, next) => {
 roomRouter.post('/verify-code/:name', async (req, res, next) => {
 	try {
 		const { code } = req.body as { code: string };
-		const roomCollection = db.collection<Room>('rooms');
-		const room = await roomCollection.findOne({ name: req.params.name });
+		const room = await findOne<Room>('rooms', { name: req.params.name });
 		if (!room) {
 			res.json(null);
 			return;
@@ -71,8 +62,7 @@ roomRouter.post('/verify-code/:name', async (req, res, next) => {
 roomRouter.post('/:name', async (req, res, next) => {
 	try {
 		const { code } = req.body as { code: string };
-		const roomCollection = db.collection<Room>('rooms');
-		const room = await roomCollection.findOne({ name: req.params.name });
+		const room = await findOne<Room>('rooms', { name: req.params.name });
 		const roomNoCode = { ...room, code: undefined } as RoomNoCode;
 		if (!room) {
 			res.json(null);
@@ -82,15 +72,7 @@ roomRouter.post('/:name', async (req, res, next) => {
 			next(new Error('invalid-room-code'));
 			return;
 		}
-		const messageCollection = db.collection<Message>('messages');
-		const messages = (await messageCollection
-			.find({ roomId: room._id })
-			.toArray()) as Message[];
-		const roomData: RoomData = {
-			...roomNoCode,
-			messages,
-		};
-		res.json(roomData);
+		res.json(roomNoCode);
 	} catch (e) {
 		next(new Error('unknown-error'));
 	}
@@ -99,8 +81,7 @@ roomRouter.post('/:name', async (req, res, next) => {
 roomRouter.post('/', verifyToken, async (req: AuthRequest, res, next) => {
 	try {
 		const { name, description, code } = req.body as InputRoom;
-		const roomCollection = db.collection<Room>('rooms');
-		const room = await roomCollection.findOne({ name });
+		const room = await findOne<Room>('rooms', { name });
 		if (room) {
 			res.json(null);
 			return;
@@ -114,13 +95,9 @@ roomRouter.post('/', verifyToken, async (req: AuthRequest, res, next) => {
 			isPrivate: code !== '',
 			createdAt: new Date().toISOString(),
 		};
-		await roomCollection.insertOne(data);
+		await insertOne<Room>('rooms', data);
 		const roomNoCode = { ...data, code: undefined } as RoomNoCode;
-		const roomData: RoomData = {
-			...roomNoCode,
-			messages: [],
-		};
-		res.json(roomData);
+		res.json(roomNoCode);
 	} catch (e) {
 		next(new Error('unknown-error'));
 	}

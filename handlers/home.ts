@@ -1,5 +1,5 @@
-import { Db } from 'mongodb';
 import { HOME } from '../utils/config';
+import { io } from '..';
 import { LiveRoom } from '../types';
 import { Server, Socket } from 'socket.io';
 
@@ -17,7 +17,7 @@ const getLiveRooms = async (io: Server) => {
 	return Object.values(liveRoomMap);
 };
 
-export const registerHomeHandlers = (io: Server, socket: Socket, db: Db) => {
+export const registerHomeHandlers = (socket: Socket) => {
 	const updateLiveRooms = async (callback: (liveRooms: LiveRoom[]) => void) => {
 		const liveRooms = await getLiveRooms(io);
 		callback(liveRooms);

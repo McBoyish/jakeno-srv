@@ -1,23 +1,23 @@
-import { Db, ObjectId } from 'mongodb';
-import { Server, Socket } from 'socket.io';
+import { ObjectId } from 'mongodb';
+import { Socket } from 'socket.io';
+import { insertOne } from '../utils/database';
 import { InputMessage, Message } from '../types';
 
-export const registerMessageHandlers = (_: Server, socket: Socket, db: Db) => {
+export const registerMessageHandlers = (socket: Socket) => {
 	const message = async (
-		message: InputMessage,
+		input: InputMessage,
 		callback: (res: Message) => void
 	) => {
-		const messages = db.collection<Message>('messages');
 		const data: Message = {
 			_id: new ObjectId().toString(),
-			roomId: message.roomId,
-			content: message.content,
-			user: message.user,
+			roomId: input.roomId,
+			content: input.content,
+			user: input.user,
 			createdAt: new Date().toISOString(),
 		};
-		await messages.insertOne(data);
+		await insertOne<Message>('messages', data);
 		callback(data);
-		socket.to(message.roomName).emit('message', data);
+		socket.to(input.roomName).emit('message', data);
 	};
 
 	socket.on('message', message);

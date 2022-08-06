@@ -57,11 +57,7 @@ export interface InputAccount {
 	password: string;
 }
 
-export type RoomNoCode = Omit<Room, 'code'>;
-
-export interface RoomData extends RoomNoCode {
-	messages: Message[];
-}
+export type RoomNoCode = Omit<Room, 'code'>; // named Room on client side
 
 export interface LiveRoom extends RoomNoCode {
 	activeUsers: number;

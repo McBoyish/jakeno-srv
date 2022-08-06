@@ -1,9 +1,9 @@
-import { Db } from 'mongodb';
 import { User, RoomNoCode } from '../types';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
+import { io } from '..';
 import { HOME } from '../utils/config';
 
-export const registerRoomHandlers = (io: Server, socket: Socket, _: Db) => {
+export const registerRoomHandlers = (socket: Socket) => {
 	const joinRoom = async (
 		room: RoomNoCode,
 		callback: (users: User[]) => void
