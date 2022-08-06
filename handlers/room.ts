@@ -1,38 +1,36 @@
 import { Db } from 'mongodb';
-import { User } from '../types';
+import { User, Room } from '../types';
 import { Server, Socket } from 'socket.io';
+import { HOME } from '../utils/config';
 
 export const registerRoomHandlers = (io: Server, socket: Socket, _: Db) => {
-	const joinRoom = async (
-		room: string,
-		user: User,
-		callback: (users: User[]) => void
-	) => {
+	const joinRoom = async (room: Room, callback: (users: User[]) => void) => {
 		socket.data.room = room;
-		socket.data.user = user;
-		socket.join(room);
+		socket.join(room.name);
 
-		const sockets = await io.in(room).fetchSockets();
+		const sockets = await io.in(room.name).fetchSockets();
 		const users = sockets.map(socket => socket.data.user);
 		callback(users);
-		socket.to(room).emit('join-room', users);
+		socket.to(room.name).emit('join-room', users);
+		socket.to(HOME).emit('joined-room', room.name);
 	};
 
 	const leaveRoom = async () => {
-		const room = socket.data.room;
-		socket.data.room = undefined;
-		socket.data.user = undefined;
-		socket.leave(room);
+		const room = socket.data.room as Room;
+		socket.data.room = null;
+		socket.leave(room.name);
 
-		const sockets = await io.in(room).fetchSockets();
+		const sockets = await io.in(room.name).fetchSockets();
 		const users = sockets.map(socket => socket.data.user);
-		socket.to(room).emit('leave-room', users);
+		socket.to(room.name).emit('leave-room', users);
+		socket.to(HOME).emit('left-room', room.name);
 	};
 
 	const disconnecting = async () => {
-		await leaveRoom();
+		socket.data.room && (await leaveRoom());
 	};
 
 	socket.on('join-room', joinRoom);
+	socket.on('leave-room', leaveRoom);
 	socket.on('disconnecting', disconnecting);
 };

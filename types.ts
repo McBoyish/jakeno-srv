@@ -19,6 +19,10 @@ export interface Room {
 	createdAt: DateTime;
 }
 
+export interface LiveRoom extends Omit<Room, 'code'> {
+	activeUsers: number;
+}
+
 export interface User {
 	_id: string;
 	name: string;
