@@ -16,8 +16,8 @@ export const registerMessageHandlers = (_: Server, socket: Socket, db: Db) => {
 			createdAt: new Date().toISOString(),
 		};
 		await messages.insertOne(data);
-		socket.to(message.roomName).emit('message', data);
 		callback(data);
+		socket.to(message.roomName).emit('message', data);
 	};
 
 	socket.on('message', message);
