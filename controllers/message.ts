@@ -10,7 +10,6 @@ messageRouter.post('/', async (req, res, next) => {
 		const room = await findOne<Room>('rooms', { name: roomName });
 		if (room.code !== code) res.json(null);
 		const messages = await find<Message>('messages', { roomId: room._id });
-		// message sent
 		res.json(messages);
 	} catch (e) {
 		next(new Error('unknown-error'));

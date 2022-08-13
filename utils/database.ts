@@ -21,21 +21,21 @@ export function collection<T>(name: Collection) {
 	return db.collection<T>(name);
 }
 
-export function findOne<T>(name: Collection, filter: Filter<T>) {
-	return collection<T>(name).findOne(filter);
+export async function findOne<T>(name: Collection, filter: Filter<T>) {
+	return await collection<T>(name).findOne(filter);
 }
 
-export function find<T>(
+export async function find<T>(
 	name: Collection,
 	filter: Filter<T>,
 	options?: FindOptions
 ) {
-	return collection<T>(name).find(filter, options).toArray();
+	return await collection<T>(name).find(filter, options).toArray();
 }
 
-export function insertOne<T>(
+export async function insertOne<T>(
 	name: Collection,
 	data: OptionalUnlessRequiredId<T>
 ) {
-	return collection<T>(name).insertOne(data);
+	return await collection<T>(name).insertOne(data);
 }
