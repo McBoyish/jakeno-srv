@@ -1,18 +1,22 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
-import { insertOne, find, findOne } from '../utils/database';
+import { collection } from '../utils/database';
 import { InputRoom, Room, AuthRequest, RoomNoCode } from '../types';
 import { verifyToken } from '../utils/middlewares';
 
 export const roomRouter = express.Router();
 
+const findRoom = async (name: string) => {
+	return await collection<Room>('rooms').findOne({
+		name,
+	});
+};
+
 roomRouter.get('/', async (_, res, next) => {
 	try {
-		const rooms = (await find<Room>(
-			'rooms',
-			{ code: '' },
-			{ projection: { code: 0 } }
-		)) as RoomNoCode[];
+		const rooms = (await collection<Room>('rooms')
+			.find({ code: '' }, { projection: { code: 0 } })
+			.toArray()) as RoomNoCode[];
 		res.json(rooms);
 	} catch (e) {
 		next(new Error('unknown-error'));
@@ -21,7 +25,7 @@ roomRouter.get('/', async (_, res, next) => {
 
 roomRouter.get('/exists/:name', async (req, res, next) => {
 	try {
-		const room = await findOne<Room>('rooms', { name: req.params.name });
+		const room = await findRoom(req.params.name);
 		if (!room) {
 			res.json({ exists: false });
 			return;
@@ -34,7 +38,7 @@ roomRouter.get('/exists/:name', async (req, res, next) => {
 
 roomRouter.get('/is-private/:name', async (req, res, next) => {
 	try {
-		const room = await findOne<Room>('rooms', { name: req.params.name });
+		const room = await findRoom(req.params.name);
 		if (!room) {
 			res.json(null);
 			return;
@@ -48,7 +52,7 @@ roomRouter.get('/is-private/:name', async (req, res, next) => {
 roomRouter.post('/verify-code/:name', async (req, res, next) => {
 	try {
 		const { code } = req.body as { code: string };
-		const room = await findOne<Room>('rooms', { name: req.params.name });
+		const room = await findRoom(req.params.name);
 		if (!room) {
 			res.json(null);
 			return;
@@ -62,7 +66,7 @@ roomRouter.post('/verify-code/:name', async (req, res, next) => {
 roomRouter.post('/:name', async (req, res, next) => {
 	try {
 		const { code } = req.body as { code: string };
-		const room = await findOne<Room>('rooms', { name: req.params.name });
+		const room = await findRoom(req.params.name);
 		const roomNoCode = { ...room, code: undefined } as RoomNoCode;
 		if (!room) {
 			res.json(null);
@@ -81,7 +85,7 @@ roomRouter.post('/:name', async (req, res, next) => {
 roomRouter.post('/', verifyToken, async (req: AuthRequest, res, next) => {
 	try {
 		const { name, description, code } = req.body as InputRoom;
-		const room = await findOne<Room>('rooms', { name });
+		const room = await findRoom(name);
 		if (room) {
 			res.json(null);
 			return;
@@ -95,7 +99,7 @@ roomRouter.post('/', verifyToken, async (req: AuthRequest, res, next) => {
 			isPrivate: code !== '',
 			createdAt: new Date().toISOString(),
 		};
-		await insertOne<Room>('rooms', data);
+		await collection<Room>('rooms').insertOne(data);
 		const roomNoCode = { ...data, code: undefined } as RoomNoCode;
 		res.json(roomNoCode);
 	} catch (e) {

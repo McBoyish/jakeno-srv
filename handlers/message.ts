@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { Socket } from 'socket.io';
-import { insertOne } from '../utils/database';
+import { collection } from '../utils/database';
 import { InputMessage, Message } from '../types';
 
 export const registerMessageHandlers = (socket: Socket) => {
@@ -16,7 +16,7 @@ export const registerMessageHandlers = (socket: Socket) => {
 				user: input.user,
 				createdAt: new Date().toISOString(),
 			};
-			await insertOne<Message>('messages', data);
+			await collection<Message>('messages').insertOne(data);
 			callback(data);
 			socket.to(input.roomName).emit('message', data);
 		} catch (e) {

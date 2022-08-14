@@ -1,19 +1,25 @@
 import express from 'express';
-import { findOne, find } from '../utils/database';
+import { collection } from '../utils/database';
 import { Message, Room } from '../types';
 
 export const messageRouter = express.Router();
 
 messageRouter.post('/', async (req, res, next) => {
 	try {
-		const { roomName, code } = req.body as { roomName: string; code: string };
-		const room = await findOne<Room>('rooms', { name: roomName });
+		const { roomName, code, cursor } = req.body as {
+			roomName: string;
+			code: string;
+			cursor: string;
+		};
+		const room = await collection<Room>('rooms').findOne({ name: roomName });
 		if (room.code !== code) res.json(null);
-		const messages = await find<Message>(
-			'messages',
-			{ roomId: room._id },
-			{ sort: { _id: -1 } }
-		);
+		const findCursor = collection<Message>('messages').find({
+			roomId: room._id,
+		});
+		if (cursor !== '') {
+			findCursor.filter({ _id: { $lt: cursor } });
+		}
+		const messages = await findCursor.sort({ _id: -1 }).limit(50).toArray();
 		res.json(messages);
 	} catch (e) {
 		next(new Error('unknown-error'));

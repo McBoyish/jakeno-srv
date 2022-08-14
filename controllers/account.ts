@@ -1,6 +1,6 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
-import { findOne, insertOne } from '../utils/database';
+import { collection } from '../utils/database';
 import { User, InputAccount, Account, UserData } from '../types';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -11,7 +11,7 @@ export const accountRouter = express.Router();
 accountRouter.post('/register', async (req, res, next) => {
 	try {
 		const { name, password } = req.body as InputAccount;
-		const user = await findOne<User>('users', { name });
+		const user = await collection<User>('users').findOne({ name });
 		if (user) {
 			res.json(null);
 			return;
@@ -22,8 +22,8 @@ accountRouter.post('/register', async (req, res, next) => {
 			password: await bcrypt.hash(password, 10),
 			createdAt: new Date().toISOString(),
 		};
-		await insertOne<Account>('accounts', account);
-		await insertOne<User>('users', account.user);
+		await collection<Account>('accounts').insertOne(account);
+		await collection<User>('users').insertOne(account.user);
 		const token = jwt.sign(account.user, AUTH_KEY, { expiresIn: '28d' });
 		const userData: UserData = { ...account.user, token };
 		res.json(userData);
@@ -35,7 +35,9 @@ accountRouter.post('/register', async (req, res, next) => {
 accountRouter.post('/login', async (req, res, next) => {
 	try {
 		const { name, password } = req.body as InputAccount;
-		const account = await findOne<Account>('accounts', { 'user.name': name });
+		const account = await collection<Account>('accounts').findOne({
+			'user.name': name,
+		});
 		if (account && (await bcrypt.compare(password, account.password))) {
 			const token = jwt.sign(account.user, AUTH_KEY, {
 				expiresIn: '28d',
