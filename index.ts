@@ -26,4 +26,4 @@ io.on('connection', (socket: Socket) => {
 	registerHomeHandlers(socket);
 });
 
-httpServer.listen(PORT || 4000);
+httpServer.listen(PORT || 8080);
