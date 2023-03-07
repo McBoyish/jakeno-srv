@@ -33,6 +33,20 @@ export interface Message {
 	createdAt: DateTime;
 }
 
+export interface Conversation {
+	_id: string;
+	participants: string[]; // array of names (size 2 for now)
+	createdAt: DateTime;
+}
+
+export interface PrivateMessage {
+	_id: string;
+	convId: string;
+	content: string;
+	user: User;
+	createdAt: DateTime;
+}
+
 /***************REQUEST INTERFACES***************/
 export interface AuthRequest extends Request {
 	user: User;
@@ -65,4 +79,15 @@ export interface LiveRoom extends RoomNoCode {
 
 export interface UserData extends User {
 	token: string;
+}
+
+export interface InputPrivateMessage {
+	convId: string;
+	content: string;
+	user: User;
+	createdAt: DateTime;
+}
+
+export interface InputConv {
+	participants: string[]; // array of names (size 2 for now)
 }

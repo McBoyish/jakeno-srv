@@ -9,7 +9,13 @@ client.connect().then(client => {
 	console.log(`Successfully connected to database`);
 });
 
-type Collection = 'users' | 'rooms' | 'accounts' | 'messages';
+type Collection =
+	| 'users'
+	| 'rooms'
+	| 'accounts'
+	| 'messages'
+	| 'privateMessages'
+	| 'conversations';
 
 export function collection<T>(name: Collection) {
 	return db.collection<T>(name);

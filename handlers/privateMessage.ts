@@ -1,16 +1,30 @@
 import { ObjectId } from 'mongodb';
 import { Socket } from 'socket.io';
 import { collection } from '../utils/database';
-import { InputMessage, Message } from '../types';
+import { InputPrivateMessage, PrivateMessage, User } from '../types';
 
 export const registerPrivateMessageHandlers = (socket: Socket) => {
-  const message = async (
-    input: any,
-    callback: (res: any) => void
-  ) => {
+	const privateMessage = async (
+		input: InputPrivateMessage,
+		receiver: User,
+		callback: (res: PrivateMessage) => void
+	) => {
+		try {
+			const data: PrivateMessage = {
+				_id: new ObjectId().toString(),
+				convId: input.convId,
+				content: input.content,
+				user: input.user,
+				createdAt: new Date().toISOString(),
+			};
+			await collection<PrivateMessage>('privateMessages').insertOne(data);
+			callback(data);
+			socket.to(receiver.name).emit('private-message', data);
+		} catch (e) {
+			callback(null);
+			socket.to(receiver.name).emit('private-message', null);
+		}
+	};
 
-  };
-}
-
-// private msg
-// participant: [A, B]
+	socket.on('private-message', privateMessage);
+};

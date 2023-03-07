@@ -16,7 +16,7 @@ export const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
 		res.status(500).json({ message: error.message });
 		return;
 	}
-	if (error.message === 'invalid-room-code') {
+	if (error.message === 'invalid-room-code' || error.message === 'forbidden') {
 		res.status(403).json({ message: error.message });
 		return;
 	}
