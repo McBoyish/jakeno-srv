@@ -9,10 +9,11 @@ export const registerMessageHandlers = (socket: Socket) => {
 		callback: (res: Message) => void
 	) => {
 		try {
+			const maxLength = 1000;
 			const data: Message = {
 				_id: new ObjectId().toString(),
 				roomId: input.roomId,
-				content: input.content,
+				content: input.content.slice(0, maxLength),
 				user: input.user,
 				createdAt: new Date().toISOString(),
 			};

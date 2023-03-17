@@ -8,7 +8,7 @@ type Res = express.Response;
 type Next = express.NextFunction;
 
 export const unknownEndpoint = (_: Req, res: Res) => {
-	res.status(404).json({ message: 'page-not-found' });
+	res.status(404).json({ message: 'not-found' });
 };
 
 export const errorHandler = (error: Error, _: Req, res: Res, next: Next) => {
