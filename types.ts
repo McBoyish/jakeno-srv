@@ -23,6 +23,7 @@ export interface Room {
 export interface User {
 	_id: string;
 	name: string;
+	// TODO: add profile info here
 }
 
 export interface Message {
