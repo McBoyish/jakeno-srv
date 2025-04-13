@@ -15,7 +15,8 @@ type Collection =
 	| 'accounts'
 	| 'messages'
 	| 'privateMessages'
-	| 'conversations';
+	| 'conversations'
+	| 'tasks';
 
 export function collection<T>(name: Collection) {
 	return db.collection<T>(name);

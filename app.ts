@@ -6,6 +6,7 @@ import { unknownEndpoint, errorHandler } from './utils/middlewares';
 import { messageRouter } from './controllers/message';
 import { convRouter } from './controllers/conversation';
 import { privateMessageRouter } from './controllers/privateMessage';
+import { taskRouter } from './controllers/task';
 
 export const app = express();
 app.use(cors({ origin: [ORIGIN, 'http://localhost:3000'] }));
@@ -15,6 +16,7 @@ app.use('/api/message', messageRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/conv', convRouter);
+app.use('/api/task', taskRouter);
 app.use('/api/privateMessage', privateMessageRouter);
 app.use(unknownEndpoint);
 app.use(errorHandler);

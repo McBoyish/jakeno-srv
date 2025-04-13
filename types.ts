@@ -2,6 +2,15 @@ import { Request } from 'express';
 
 type DateTime = string;
 
+export interface Task {
+	_id?: string;
+	date: string;
+	timeEntries: string;
+	title: string;
+	description: string;
+	project: string;
+}
+
 /***************MONGODB INTERFACES***************/
 export interface Account {
 	_id: string;
