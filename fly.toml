@@ -1,1 +1,21 @@
-app = "jakeno-srv"
+# fly.toml app configuration file generated for jakeno-srv-fragrant-paper-1198 on 2025-04-13T22:48:50-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'jakeno-srv-fragrant-paper-1198'
+primary_region = 'lax'
+
+[build]
+  builder = 'paketobuildpacks/builder:base'
+  buildpacks = ['gcr.io/paketo-buildpacks/nodejs']
+  image = 'flyio/hellofly:latest'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[http_service]
+  internal_port = 8080
+  force_https = true
